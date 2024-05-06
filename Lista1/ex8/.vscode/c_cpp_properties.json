@@ -5,10 +5,10 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 // Aqui você inclui os caminhos para os diretórios que contém os cabeçalhos das funções
-                "${workspaceFolder}/Dependencies/GLAD/include",
-                "${workspaceFolder}/Dependencies/glfw-3.4.bin.WIN64/include",
-                "${workspaceFolder}/Dependencies/glm",
-                "${workspaceFolder}/Common/include"
+                "${workspaceFolder}/../../Dependencies/GLAD/include",
+                "${workspaceFolder}/../../Dependencies/glfw-3.4.bin.WIN64/include",
+                "${workspaceFolder}/../../Dependencies/glm",
+                "${workspaceFolder}/../../Common/include"
             ],
             "defines": [
                 "_DEBUG",
