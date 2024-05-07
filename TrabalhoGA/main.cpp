@@ -13,9 +13,8 @@ const GLuint SCREEN_WIDTH = 800;
 const GLuint SCREEN_HEIGHT = 600;
 const GLuint SCREEN_PLAYABLE_LIMIT = 48;
 
-const glm::vec3 playerScale = glm::vec3(192.0, 192.0, 1.0);
 const glm::vec3 playerInitPosition = glm::vec3(SCREEN_WIDTH/2, 40, 0.0);
-const GLchar* playerTexturePath = "Textures/Player/Fighter/Idle.png";
+const GLchar* playerTexturePath = "Textures/Player/Fighter/Attack_1.png";
 Sprite playerSprite;
 
 const glm::vec3 backgroundScale = glm::vec3(static_cast<float>(SCREEN_WIDTH), static_cast<float>(SCREEN_HEIGHT), 1.0);
@@ -24,14 +23,24 @@ const GLchar* backgroundTexturePath = "Textures/Background/background.jpg";
 
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
-GLuint loadTexture(const GLchar* filePath);
+GLuint loadTexture(const GLchar* filePath, int* spriteWidth, int* spriteHeight);
 
 
 int main()
 {
+	GLFWwindow* window;
+	int width, height;
+	int spriteWidth;
+	int spriteHeight;
+	Sprite backgroundSprite;
+	Sprite enemySprite;
+	GLuint playerTextureId;
+	GLuint backgroundTextureId;
+	GLuint enemyTextureId;
+
 	glfwInit();
 
-	GLFWwindow* window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Trabalho GA", nullptr, nullptr);
+	window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Trabalho GA", nullptr, nullptr);
 	glfwMakeContextCurrent(window);
 
 	glfwSetKeyCallback(window, key_callback);
@@ -43,40 +52,41 @@ int main()
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	int width, height;
 	glfwGetFramebufferSize(window, &width, &height);
 	glViewport(0, 0, width, height);
 
-	Shader* shader = new Shader("VertexShader", "FragmentShader");	
+	Shader* shader = new Shader("VertexShader", "FragmentShader");
 	shader->use();
 
-	GLuint backgroundTextureId = loadTexture(backgroundTexturePath);
-	GLuint playerTextureId = loadTexture(playerTexturePath);
-	GLuint enemyTextureId = loadTexture("Textures/Enemy/green.png");
-
-
-	Sprite backgroundSprite;
+	backgroundTextureId = loadTexture(backgroundTexturePath, &spriteWidth, &spriteHeight);
 	backgroundSprite.init(
 		backgroundTextureId,
+		1,
+		1,
 		backgroundPosition,
 		backgroundScale,
 		0.0
 	);
 	backgroundSprite.setShader(shader);
 
+	playerTextureId = loadTexture(playerTexturePath, &spriteWidth, &spriteHeight);
 	playerSprite.init(
 		playerTextureId,
+		1,
+		4,
 		playerInitPosition,
-		playerScale,
+		glm::vec3(spriteWidth, spriteHeight, 1.0),
 		90.0
 	);
 	playerSprite.setShader(shader);
 
-	Sprite enemySprite;
+	enemyTextureId = loadTexture("Textures/Enemy/green.png", &spriteWidth, &spriteHeight);
 	enemySprite.init(
 		enemyTextureId,
+		1,
+		1,
 		glm::vec3(200.0,300.0,0.0),
-		glm::vec3(50.0,50.0,1.0),
+		glm::vec3(spriteWidth, spriteHeight, 1.0),
 		0.0
 	);
 	enemySprite.setShader(shader);
@@ -113,12 +123,12 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, GL_TRUE);
 	}
-	else if(key == GLFW_KEY_LEFT) {
+	else if(key == GLFW_KEY_LEFT && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
 		if(playerSprite.position().x > SCREEN_PLAYABLE_LIMIT) {
 			playerSprite.decPosX(10);
 		}
 	}
-	else if(key == GLFW_KEY_RIGHT) {
+	else if(key == GLFW_KEY_RIGHT && (action == GLFW_PRESS || action == GLFW_REPEAT)) {
 		if(playerSprite.position().x < (SCREEN_WIDTH-SCREEN_PLAYABLE_LIMIT)) {
 			playerSprite.incPosX(10);
 		}
@@ -126,10 +136,10 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 }
 
 
-GLuint loadTexture(const GLchar* filePath)
+GLuint loadTexture(const GLchar* filePath, int* spriteWidth, int* spriteHeight)
 {
 	GLuint texID = -1;
-	int width, height, no_of_channels;
+	int no_of_channels;
 	GLenum mode;
 
 	glGenTextures(1, &texID);
@@ -141,14 +151,14 @@ GLuint loadTexture(const GLchar* filePath)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	stbi_uc* data = stbi_load(filePath, &width, &height, &no_of_channels, 0);
+	stbi_uc* data = stbi_load(filePath, spriteWidth, spriteHeight, &no_of_channels, 0);
 	if(!data) {
     	std::cerr << "Failed to load texture from " << filePath << "\n";
 		goto loadTextureEnd;
 	}
 
 	mode = no_of_channels == 3 ? GL_RGB : GL_RGBA;
-	glTexImage2D(GL_TEXTURE_2D, 0, mode, width, height, 0, mode, GL_UNSIGNED_BYTE, data);
+	glTexImage2D(GL_TEXTURE_2D, 0, mode, *spriteWidth, *spriteHeight, 0, mode, GL_UNSIGNED_BYTE, data);
 
 	glGenerateMipmap(GL_TEXTURE_2D);
 

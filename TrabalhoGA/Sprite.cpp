@@ -11,21 +11,26 @@ Sprite::~Sprite()
     glDeleteVertexArrays(1, &this->__VAO);
 }
 
-void Sprite::init(GLuint texID, glm::vec3 position, glm::vec3 scale, float angle, glm::vec3 color)
+void Sprite::init(GLuint texID, GLuint no_of_animations, GLuint no_of_frames, glm::vec3 position, glm::vec3 scale, float angle, glm::vec3 color)
 {
     this->__position = position;
-    this->__scale = scale;
+    this->__scale.x = scale.x / static_cast<float>(no_of_frames);
+    this->__scale.y = scale.y / static_cast<float>(no_of_animations);
     this->__angle = angle;
     this->__texID = texID;
+    this->__no_of_animations = no_of_animations;
+    this->__no_of_frames = no_of_frames;
+    this->__texture_offset.s = 1.0 / static_cast<float>(no_of_frames);
+    this->__texture_offset.t = 1.0 / static_cast<float>(no_of_animations);
 
     GLfloat vertices[] = {
 	/*   x    y    z    r        g        b        s    t   */
-		-0.5, 0.5, 0.0, color.r, color.g, color.b, 0.0, 1.0, /* Vertice 0 */
-        -0.5,-0.5, 0.0, color.r, color.g, color.b, 0.0, 0.0, /* Vertice 1 */
-         0.5, 0.5, 0.0, color.r, color.g, color.b, 1.0, 1.0, /* Vertice 2 */
-        -0.5,-0.5, 0.0, color.r, color.g, color.b, 0.0, 0.0, /* Vertice 3 */
-         0.5,-0.5, 0.0, color.r, color.g, color.b, 1.0, 0.0, /* Vertice 4 */
-         0.5, 0.5, 0.0, color.r, color.g, color.b, 1.0, 1.0  /* Vertice 5 */
+		-0.5, 0.5, 0.0, color.r, color.g, color.b, 0.0, this->__texture_offset.t,                       /* Vertice 0 */
+        -0.5,-0.5, 0.0, color.r, color.g, color.b, 0.0, 0.0,                                            /* Vertice 1 */
+         0.5, 0.5, 0.0, color.r, color.g, color.b, this->__texture_offset.s, this->__texture_offset.t,  /* Vertice 2 */
+        -0.5,-0.5, 0.0, color.r, color.g, color.b, 0.0, 0.0,                                            /* Vertice 3 */
+         0.5,-0.5, 0.0, color.r, color.g, color.b, this->__texture_offset.s, 0.0,                       /* Vertice 4 */
+         0.5, 0.5, 0.0, color.r, color.g, color.b, this->__texture_offset.s, this->__texture_offset.t   /* Vertice 5 */
 	};
 
 	GLuint VBO;
@@ -53,11 +58,17 @@ void Sprite::init(GLuint texID, glm::vec3 position, glm::vec3 scale, float angle
 
 void Sprite::update()
 {
+    this->__frame_index = (this->__frame_index + 1) % this->__no_of_frames;
+
+    float textureOffsetS = this->__frame_index * this->__texture_offset.s;
+    float textureOffsetT = this->__animation_index * this->__texture_offset.t;
+
     glm::mat4 model = glm::mat4(1);
     model = glm::translate(model, this->__position);
 	model = glm::rotate(model,glm::radians(this->__angle), glm::vec3(0.0, 0.0, 1.0));
     model = glm::scale(model, this->__scale);
     this->__shader->setMat4("model", glm::value_ptr(model));
+    this->__shader->setVec2("textureOffset", textureOffsetS, textureOffsetT);
 }
 
 void Sprite::draw()

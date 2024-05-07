@@ -13,7 +13,7 @@ public:
     Sprite();
     ~Sprite();
 
-    void init(GLuint texID, glm::vec3 position=glm::vec3(0), glm::vec3 scale=glm::vec3(1), float angle=0.0, glm::vec3 color=glm::vec3(0.0, 0.0, 0.0));
+    void init(GLuint texID, GLuint no_of_animations=1, GLuint no_of_frames=1, glm::vec3 position=glm::vec3(0), glm::vec3 scale=glm::vec3(1), float angle=0.0, glm::vec3 color=glm::vec3(0.0, 0.0, 0.0));
     void update();
     void draw();
     void finalize();
@@ -33,4 +33,9 @@ private:
     glm::vec3 __scale;
     float __angle;
     Shader* __shader;
+    GLuint __no_of_animations;
+    GLuint __no_of_frames;
+    GLuint __animation_index;
+    GLuint __frame_index;
+    glm::vec2 __texture_offset;
 };
