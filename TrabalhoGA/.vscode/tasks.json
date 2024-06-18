@@ -8,7 +8,7 @@
                 "-fdiagnostics-color=always",
                 "-g",
                 // Aqui você inclui os caminhos para os diretórios que contém os cabeçalhos das funções
-                "-I${workspaceFolder}/../Dependencies/GLAD/include",
+                "-I${workspaceFolder}/../Dependencies/GLAD/include/",
                 "-I${workspaceFolder}/../Dependencies/glfw-3.4.bin.WIN64/include",
                 "-I${workspaceFolder}/../Dependencies/glm",
                 "-I${workspaceFolder}/../Dependencies/stb_image",
@@ -19,6 +19,7 @@
                 "${workspaceFolder}/../Dependencies/stb_image/stb_image.cpp",
                 "${workspaceFolder}/../Common/src/Shader.cpp",
                 "${workspaceFolder}/Sprite.cpp",
+                "${workspaceFolder}/Timer.cpp",
                 "-o",
                 "${fileDirname}\\${fileBasenameNoExtension}.exe",
                 // Aqui você inclui o caminho para os diretórios que possuem as bibliotecas estáticas

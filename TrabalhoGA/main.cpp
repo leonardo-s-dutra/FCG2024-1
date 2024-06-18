@@ -8,10 +8,12 @@
 
 #include <Shader.h>
 #include "Sprite.h"
+#include "Timer.h"
 
 const GLuint SCREEN_WIDTH = 800;
 const GLuint SCREEN_HEIGHT = 600;
 const GLuint SCREEN_PLAYABLE_LIMIT = 48;
+const float FRAMERATE = 24.0;
 
 const glm::vec3 playerInitPosition = glm::vec3(SCREEN_WIDTH/2, 40, 0.0);
 const GLchar* playerTexturePath = "Textures/Player/Fighter/Attack_1.png";
@@ -37,6 +39,7 @@ int main()
 	GLuint playerTextureId;
 	GLuint backgroundTextureId;
 	GLuint enemyTextureId;
+	Timer *timer = new Timer(10);
 
 	glfwInit();
 
@@ -97,7 +100,17 @@ int main()
 	glActiveTexture(GL_TEXTURE0);
 	shader->setInt("textureBuffer", 0);
 
+	float lastTime = 0;
+
 	while(!glfwWindowShouldClose(window)) {
+		float now;
+		float dt;
+		do {
+			now = (float)glfwGetTime();
+			dt = now - lastTime;
+		} while(dt < (1.0 / FRAMERATE));
+		lastTime = now;
+		
 		glfwPollEvents();
 
 		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
@@ -113,6 +126,7 @@ int main()
 	glfwTerminate();
 	
 	delete shader;
+	delete timer;
 
 	return 0;
 }
